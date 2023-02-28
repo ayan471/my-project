@@ -32,5 +32,73 @@ app.post("/api/create", (req, res) => {
     }
   })();
 });
+// read item
+app.get("/api/read/:item_id", (req, res) => {
+  (async () => {
+    try {
+      const document = db.collection("items").doc(req.params.item_id);
+      const item = await document.get();
+      const response = item.data();
+      return res.status(200).send(response);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  })();
+});
+
+// read all
+app.get("/api/read", (req, res) => {
+  (async () => {
+    try {
+      const query = db.collection("items");
+      const response = [];
+      await query.get().then((querySnapshot) => {
+        const docs = querySnapshot.docs;
+        for (const doc of docs) {
+          const selectedItem = {
+            id: doc.id,
+            item: doc.data().item,
+          };
+          response.push(selectedItem);
+        }
+      });
+      return res.status(200).send(response);
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  })();
+});
+
+// update
+app.put("/api/update/:item_id", (req, res) => {
+  (async () => {
+    try {
+      const document = db.collection("items").doc(req.params.item_id);
+      await document.update({
+        item: req.body.item,
+      });
+      return res.status(200).send();
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  })();
+});
+
+// delete
+app.delete("/api/delete/:item_id", (req, res) => {
+  (async () => {
+    try {
+      const document = db.collection("items").doc(req.params.item_id);
+      await document.delete();
+      return res.status(200).send();
+    } catch (error) {
+      console.log(error);
+      return res.status(500).send(error);
+    }
+  })();
+});
 
 exports.app = functions.https.onRequest(app);
